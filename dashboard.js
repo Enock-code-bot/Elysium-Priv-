@@ -49,14 +49,11 @@ function renderStats(data) {
     totalRSVPs.innerText = data.length;
     totalAccepted.innerText = acceptedList.length;
     totalDeclined.innerText = declinedList.length;
-
-    const guestsCount = acceptedList.reduce((acc, curr) => acc + (curr.attendees || 0), 0);
-    totalGuests.innerText = guestsCount;
 }
 
 function renderTable(data) {
     if (data.length === 0) {
-        responsesBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem;">No responses found.</td></tr>`;
+        responsesBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 2rem;">No responses found.</td></tr>`;
         return;
     }
 
@@ -65,21 +62,37 @@ function renderTable(data) {
             <td>
                 <div class="guest-info">
                     <span class="name">${row.name}</span>
-                    <span class="email">${row.email || 'N/A'}</span>
                 </div>
             </td>
             <td>
                 <span class="status-badge status-${row.status.toLowerCase()}">${row.status}</span>
             </td>
-            <td>${row.attendees || '-'}</td>
-            <td>
-                <div class="notes-cell">${row.notes || row.reason || '-'}</div>
-            </td>
             <td>
                 <div class="timestamp">${new Date(row.timestamp).toLocaleDateString()}</div>
             </td>
+            <td>
+                <button class="btn-delete" onclick="deleteResponse(${row.id})">Remove</button>
+            </td>
         </tr>
     `).join('');
+}
+
+async function deleteResponse(id) {
+    if (!confirm('Are you sure you want to remove this response?')) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/responses/${id}`, {
+            method: 'DELETE'
+        });
+        if (response.ok) {
+            await fetchResponses(); // Refresh data
+        } else {
+            alert('Error deleting response.');
+        }
+    } catch (error) {
+        console.error('Delete Error:', error);
+        alert('Could not delete. Is the server running?');
+    }
 }
 
 function filterResponses(query) {

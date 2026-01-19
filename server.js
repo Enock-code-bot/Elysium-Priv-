@@ -30,18 +30,19 @@ app.get('/api/invitation/:token', (req, res) => {
 app.post('/api/rsvp/accept', (req, res) => {
     const { invitation_id, name, email, attendees, notes } = req.body;
 
-    if (!invitation_id || !name || !email) {
-        return res.status(400).json({ error: "Missing required fields (invitation_id, name, email)" });
+    if (!invitation_id || !name) {
+        return res.status(400).json({ error: "Missing required fields (invitation_id, name)" });
     }
 
     const stmt = db.prepare(`INSERT INTO rsvp_responses (invitation_id, name, email, status, attendees, notes) VALUES (?, ?, ?, 'ACCEPTED', ?, ?)`);
-    stmt.run(invitation_id, name, email, attendees || 1, notes || "", async function (err) {
+    stmt.run(invitation_id, name, email || null, 1, notes || "", async function (err) {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
 
-        // Send confirmation email (async)
-        sendConfirmationEmail(email, name, invitation_id).catch(console.error);
+        if (email) {
+            sendConfirmationEmail(email, name, invitation_id).catch(console.error);
+        }
 
         res.json({ message: "RSVP Accepted", id: this.lastID });
     });
@@ -82,6 +83,17 @@ app.get('/api/admin/responses', (req, res) => {
     });
 });
 
+// DELETE /api/admin/responses/:id - Delete a response
+app.delete('/api/admin/responses/:id', (req, res) => {
+    const id = req.params.id;
+    db.run("DELETE FROM rsvp_responses WHERE id = ?", [id], function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ message: "Response deleted", changes: this.changes });
+    });
+});
+
 // GET /api/admin/export - Export responses to CSV
 app.get('/api/admin/export', (req, res) => {
     const query = `
@@ -99,15 +111,11 @@ app.get('/api/admin/export', (req, res) => {
             return res.status(404).send("No data to export");
         }
 
-        const headers = ["Event", "Name", "Email", "Status", "Attendees", "Notes", "Reason", "Timestamp"];
+        const headers = ["Event", "Name", "Status", "Timestamp"];
         const csvRows = rows.map(row => [
             row.event_name,
             row.name,
-            row.email || 'N/A',
             row.status,
-            row.attendees || 0,
-            `"${(row.notes || '').replace(/"/g, '""')}"`,
-            `"${(row.reason || '').replace(/"/g, '""')}"`,
             row.timestamp
         ].join(','));
 
@@ -127,17 +135,21 @@ async function sendConfirmationEmail(guestEmail, guestName, invitationId) {
 
         // Configure Nodemailer (using ethereal.email for testing if no env vars)
         let transporter;
-        if (process.env.SMTP_HOST) {
-            transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: process.env.SMTP_PORT,
-                secure: process.env.SMTP_SECURE === 'true',
-                auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASS,
-                },
-            });
-        } else {
+        try {
+            if (process.env.SMTP_HOST && process.env.SMTP_HOST !== 'smtp.example.com') {
+                transporter = nodemailer.createTransport({
+                    host: process.env.SMTP_HOST,
+                    port: process.env.SMTP_PORT,
+                    secure: process.env.SMTP_SECURE === 'true',
+                    auth: {
+                        user: process.env.SMTP_USER,
+                        pass: process.env.SMTP_PASS,
+                    },
+                });
+            } else {
+                throw new Error("No real SMTP config");
+            }
+        } catch (e) {
             // Fallback to temporary test account
             let testAccount = await nodemailer.createTestAccount();
             transporter = nodemailer.createTransport({

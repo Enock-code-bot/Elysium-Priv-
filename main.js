@@ -54,10 +54,7 @@ document.getElementById('rsvpAcceptForm').addEventListener('submit', async (e) =
     e.preventDefault();
     const data = {
         invitation_id: invitationData ? invitationData.id : 1,
-        name: document.getElementById('guestName').value,
-        email: document.getElementById('guestEmail').value,
-        attendees: parseInt(document.getElementById('guestAttendees').value),
-        notes: document.getElementById('guestNotes').value
+        name: document.getElementById('guestName').value
     };
 
     try {
@@ -66,13 +63,63 @@ document.getElementById('rsvpAcceptForm').addEventListener('submit', async (e) =
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+
         if (response.ok) {
-            showSection(successScreen);
+            acceptForm.style.display = 'none';
+            successScreen.style.display = 'flex';
+
+            // Populate welcome words
+            document.getElementById('confirmGuestName').innerText = data.name;
+
+            // Prepare data for Download Template
+            const whenVal = document.querySelector('.event-details .detail-item:nth-child(1) .value').innerText;
+            const whereVal = document.querySelector('.event-details .detail-item:nth-child(2) .value').innerText;
+
+            document.getElementById('confirmWhen').innerText = whenVal;
+            document.getElementById('confirmWhere').innerText = whereVal;
+
+            document.getElementById('ticketGuestName').innerText = data.name;
+            document.getElementById('ticketEventName').innerText = invitationData ? invitationData.event_name : 'Exclusive Gathering';
+            document.getElementById('ticketWhen').innerText = whenVal;
+            document.getElementById('ticketWhere').innerText = whereVal;
+
+            // Setup Visual Download
+            document.getElementById('downloadTicket').onclick = async () => {
+                const ticket = document.getElementById('digitalInvitation');
+
+                // Temporary show to capture (but keep off-screen)
+                ticket.style.left = '0';
+                ticket.style.top = '0';
+                ticket.style.position = 'fixed';
+                ticket.style.visibility = 'visible';
+
+                try {
+                    const canvas = await html2canvas(ticket, {
+                        scale: 2, // High resolution
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#000'
+                    });
+
+                    const link = document.createElement('a');
+                    link.download = `Invitation_${data.name.replace(/\s+/g, '_')}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } catch (err) {
+                    console.error('Download failed:', err);
+                    alert('Download failed. Please try again.');
+                } finally {
+                    // Hide again
+                    ticket.style.left = '-9999px';
+                    ticket.style.top = '-9999px';
+                    ticket.style.position = 'absolute';
+                }
+            };
         } else {
-            alert('Error submitting RSVP. Please try again.');
+            alert('Something went wrong. Please try again.');
         }
     } catch (error) {
-        console.error('RSVP Error:', error);
+        console.error('Error:', error);
         alert('Network error. Is the server running?');
     }
 });
@@ -81,8 +128,7 @@ document.getElementById('rsvpDeclineForm').addEventListener('submit', async (e) 
     e.preventDefault();
     const data = {
         invitation_id: invitationData ? invitationData.id : 1,
-        name: document.getElementById('declineGuestName').value,
-        reason: document.getElementById('declineReason').value
+        name: document.getElementById('declineGuestName').value
     };
 
     try {

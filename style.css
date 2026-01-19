@@ -27,7 +27,7 @@ body {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background-image: linear-gradient(rgba(26, 11, 46, 0.8), rgba(26, 11, 46, 0.8)), url('public/invite-bg.png');
+    background-image: linear-gradient(rgba(26, 11, 46, 0.8), rgba(26, 11, 46, 0.8)), url('invitation_bg.png');
     background-size: cover;
     background-position: center;
 }
@@ -140,6 +140,10 @@ body {
         gap: 1rem;
         text-align: left;
     }
+
+    .invite-card {
+        padding: 2rem;
+    }
 }
 
 .btn {
@@ -179,6 +183,12 @@ body {
     border-color: var(--text-white);
 }
 
+.btn-small {
+    padding: 0.6rem 1.8rem;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+}
+
 /* Forms and Interactive States */
 .form-container {
     display: none;
@@ -190,7 +200,7 @@ body {
 .form-title {
     font-family: 'Playfair Display', serif;
     font-size: 1.5rem;
-    color: var(--accent);
+    color: var(--primary-gold);
     margin-bottom: 0.5rem;
     text-align: center;
 }
@@ -207,21 +217,16 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 1rem;
     border-radius: 8px;
-    color: var(--text-light);
-    font-family: 'Inter', sans-serif;
+    color: var(--text-white);
+    font-family: 'Outfit', sans-serif;
     transition: all 0.3s ease;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: var(--accent);
+    border-color: var(--primary-gold);
     background: rgba(255, 255, 255, 0.1);
-}
-
-.form-group textarea {
-    min-height: 100px;
-    resize: vertical;
 }
 
 .btn-back {
@@ -232,7 +237,7 @@ body {
 
 .btn-back:hover {
     background: rgba(255, 255, 255, 0.05);
-    border-color: var(--text-light);
+    border-color: var(--text-white);
 }
 
 .success-screen,
@@ -240,16 +245,48 @@ body {
     display: none;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
     animation: fadeIn 0.8s ease-out forwards;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--deep-purple);
-    z-index: 10;
-    animation: fadeIn 0.5s ease forwards;
+    padding: 2rem 0;
+}
+
+.confirmation-ticket {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 1.5rem;
+    text-align: left;
+}
+
+.ticket-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 0.8rem;
+}
+
+.ticket-seal {
+    width: 120px;
+    height: 120px;
+    margin: -30px auto 20px;
+    display: block;
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.5));
+}
+
+.ticket-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--primary-gold);
+}
+
+.ticket-value {
+    font-size: 1rem;
+    color: var(--text-white);
+    font-weight: 400;
 }
 
 @keyframes fadeIn {
@@ -267,4 +304,108 @@ body {
     height: 1px;
     background: var(--primary-gold);
     margin: 2rem auto;
+}
+
+/* Digital Invitation Ticket Template (High-Res for Download) */
+.digital-ticket-template {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    width: 800px;
+    padding: 80px;
+    background: #000;
+    color: #fff;
+    font-family: 'Playfair Display', serif;
+    overflow: hidden;
+}
+
+.ticket-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('invitation_bg.png') no-repeat center center;
+    background-size: cover;
+    opacity: 0.7;
+    z-index: 1;
+}
+
+.ticket-content {
+    position: relative;
+    z-index: 2;
+    border: 2px solid rgba(212, 175, 55, 0.5);
+    padding: 60px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+}
+
+.ticket-brand {
+    font-size: 1.5rem;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    color: var(--primary-gold);
+    display: block;
+    margin-bottom: 30px;
+}
+
+.ticket-divider {
+    width: 80px;
+    height: 2px;
+    background: var(--primary-gold);
+    margin: 30px auto;
+}
+
+.ticket-title {
+    font-size: 3.5rem;
+    font-weight: 300;
+    margin-bottom: 40px;
+    color: #fff;
+    letter-spacing: 2px;
+}
+
+.guest-name-display {
+    font-size: 2.5rem;
+    color: var(--primary-gold);
+    margin-bottom: 50px;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+}
+
+.ticket-event-info {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    text-align: left;
+    margin-bottom: 60px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.info-group {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 15px;
+}
+
+.info-label {
+    font-size: 1rem;
+    text-transform: uppercase;
+    color: var(--primary-gold);
+    display: block;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+}
+
+.info-value {
+    font-size: 1.4rem;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+}
+
+.ticket-footer {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Outfit', sans-serif;
 }

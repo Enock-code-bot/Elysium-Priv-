@@ -208,6 +208,22 @@ td {
     color: var(--text-muted);
 }
 
+.btn-delete {
+    background: transparent;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+    background: var(--danger);
+    color: #fff;
+}
+
 .notes-cell {
     max-width: 300px;
     font-size: 0.9rem;
